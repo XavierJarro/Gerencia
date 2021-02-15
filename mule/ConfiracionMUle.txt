@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="76665f55-0cf5-41eb-b146-b75a4190e3a7" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<http:request-config name="ObtenerUsuarios" doc:name="HTTP Request configuration" doc:id="f815c876-0873-4efd-b01a-a832ae65429c" basePath="/users" >
+		<http:request-connection host="jsonplaceholder.typicode.com" usePersistentConnections="false"/>
+	</http:request-config>
+	<http:request-config name="ConeccionLocal" doc:name="HTTP Request configuration" doc:id="7b1a221b-fd39-4bde-bc2a-7e19a5f8d872" >
+		<http:request-connection host="localhost" port="4444" />
+	</http:request-config>
+	<http:request-config name="ObtenerPerro" doc:name="ObtenerPerro" doc:id="c05684c1-cc9a-4dd5-acc5-f82d0de77848" basePath="/api/v2">
+		<http:request-connection host="pokeapi.co" usePersistentConnections="false"/>
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="90c092ab-4c6c-4587-8f9e-0b5d5dca6722" basePath="/Facturar/restservice">
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<http:request-config name="BaseDatos" doc:name="HTTP Request configuration" doc:id="d862ffdf-475b-4280-a212-5ba5e8ff384c" basePath="/Facturar/restservice">
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="90cd2dd3-9971-4cd0-895e-c560ca0dd7e5" basePath="/title" >
+		<http:request-connection host="poetrydb.org" usePersistentConnections="false" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration2" doc:name="HTTP Request configuration" doc:id="40d36757-666b-426b-bf5c-5cbf082a6401" basePath="/Facturar/restservice/gi/guardar2" >
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<flow name="Copy_of_muleproyectFlow" doc:id="894e5566-2c86-4d44-9798-4c3b10040061" >
+		<http:listener doc:name="run" doc:id="5d981dcf-f7ce-46b1-b025-02d084b1ec22" config-ref="HTTP_Listener_config" path="/" />
+		<http:request method="GET" doc:name="Request" doc:id="796951e4-4636-4cbd-86b5-ebf2a33009fd" config-ref="ConeccionLocal" path="/get_datos"/>
+		<set-variable value="#[payload.tipo]" doc:name="Tipo" doc:id="4a8fe223-a04c-4b58-aedd-817c7646f8b4" variableName="tipo"/>
+		<choice doc:name="Choice" doc:id="bf069c9d-7886-42f3-862b-fae1ed877cb7" >
+			
+			<when expression="#[vars.tipo == 1]" >
+				<flow-ref doc:name="Flow Reference" doc:id="0a2541e2-fc16-429c-91bf-d5c64ca7f280" name="CrearUsuario" />
+			
+</when>
+			<otherwise >
+				<http:request method="GET" doc:name="Request" doc:id="0520a6e8-0e04-4487-a2c8-259a3b8248f2" config-ref="ConeccionLocal" path="/error"/>
+				<set-variable value="#[payload.error]" doc:name="error" doc:id="ba8348c3-dee9-4b6a-aa66-25b7e65c9e29" variableName="error"/>
+				<set-payload value='#[{"estado": false, "error":vars.error}]' doc:name="Error 1" doc:id="a87b91d7-2385-4328-af43-6d9f1e808ff9" />
+			</otherwise>
+		</choice>
+	
+</flow>
+	<flow name="CrearUsuario" doc:id="7dc4f936-b2a9-471a-a027-bc3789a4dab1" >
+		<set-variable value="#[payload.id_usr]" doc:name="id" doc:id="3774be67-ac7a-42af-90c9-16fd08e6e544" variableName="id_usr" />
+		<set-variable value="#[payload.raza]" doc:name="raza" doc:id="701f89bd-d32d-4313-ac90-d6083aa04239" variableName="raza" />
+		<flow-ref doc:name="Obtener Variables" doc:id="612958aa-3f40-464b-84d7-451e3783ca84" name="ObtenerUsuario" />
+		<http:request method="GET" doc:name="Request" doc:id="9caedb21-66f4-454b-a9e2-049644bcef13" config-ref="ObtenerPerro" path="/pokemon/{raza}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"raza" : vars.raza
+}]]]></http:uri-params>
+		</http:request>
+		<set-variable value="#[payload.sprites.front_default]" doc:name="imagen" doc:id="426143fe-d737-4d73-bb2a-33382806e0db" variableName="imagen" />
+		<set-payload value='#[{"estado": true,&#10;"nombre":vars.nombre, &#10; "usuario":vars.usuario,&#10; "correo": vars.correo,&#10; "telefono": vars.telefono,&#10; "pagina": vars.pagina,&#10; "imagen": vars.imagen,&#10; "path": vars.path&#10;}]' doc:name="Set Payload" doc:id="7534a497-b7bb-4b17-b71f-23cdf63688e8" />
+	</flow>
+	<flow name="ObtenerUsuario" doc:id="9a8c22a1-d101-42ce-8045-8b536bf403b7" >
+		<http:request method="GET" doc:name="Request" doc:id="70d54f20-5beb-4759-9fba-27a0c33b36be" config-ref="ObtenerUsuarios" sendCorrelationId="AUTO" path="/{id}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"id" : vars.id_usr
+}]]]></http:uri-params>
+		</http:request>
+		<set-variable value="#[payload.name]" doc:name="nombre" doc:id="5acda573-fb20-478b-a6d9-b2b2657a6066" variableName=" nombre"/>
+		<set-variable value="#[payload.email]" doc:name="correo" doc:id="465e80da-395f-43f9-bdfb-30b578971130" variableName="correo"/>
+		<set-variable value="#[payload.phone]" doc:name="telefono" doc:id="044c39a5-3dd0-412f-aff0-4e7481eafa8d" variableName="telefono" />
+	
+</flow>
+
+</mule>

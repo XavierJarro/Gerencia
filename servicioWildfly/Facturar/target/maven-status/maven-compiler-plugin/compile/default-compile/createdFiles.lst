@@ -1,0 +1,7 @@
+ec\edu\ups\negocio\GestionFactura.class
+ec\edu\ups\negocio\GestionFacturaLocal.class
+ec\edu\ups\modelo\Factura.class
+ec\edu\ups\services\ServiciosRest.class
+ec\edu\ups\dao\FacturaDao.class
+ec\edu\ups\services\RestApplication.class
+ec\edu\ups\services\Respuesta.class
